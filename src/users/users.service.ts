@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { createUserDto } from './dto/update-user.dto';
 import { generateToken } from 'src/config/jwt.config';
@@ -44,5 +49,18 @@ export class UsersService {
       throw new InternalServerErrorException(error.message);
     }
   }
-  
+
+  async getUserById(id: number) {
+    const User = await this.prisma.user.findUnique({ 
+      where: { id },
+      include:{
+        todos:true
+      }
+    
+    });
+    if (!User) {
+      throw new NotFoundException('User not found');
+    }
+    return User;
+  }
 }

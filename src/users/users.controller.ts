@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { createUserDto } from './dto/update-user.dto';
 import type { Response } from 'express';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -17,6 +18,32 @@ export class UsersController {
       timestamp: new Date().toISOString(),
     };
   }
+
+  @Get("/profile")
+    @UseGuards(JwtAuthGuard)
+    async getUserById(@Req() req: Request & { user?: { id?: number | string } },  @Res() res: Response) {
+      const id = req.user?.id;
+      if (!id) {
+        throw new BadRequestException('User ID is required');
+      }
+      try {
+        const User = await this.userService.getUserById(Number(id));
+        console.log(User)
+        return res.status(200).json({
+          success: true,
+          message: '✅ User fetched successfully',
+          data: User,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: '⚠️ Failed to fetch User',
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
 
   @Post()
   async createUser(@Body() data: createUserDto) {

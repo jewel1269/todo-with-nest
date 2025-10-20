@@ -1,7 +1,8 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('todo')
 export class TodoController {
@@ -26,6 +27,10 @@ export class TodoController {
       });
     }
   }
+
+
+
+
 
   @Post("/create")
   async createTodo(@Body() data: CreateTodoDto, @Res() res: Response) {
